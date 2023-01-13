@@ -73,6 +73,24 @@ def freq_analysis(values):
 
     return positive_freqs, positive_yf
 
+def generate_plots(real_demand, freqs, yf):
+    """Genera el gráfico que muestra tanto el dominio temporal como el dominio frecuencial. Lo guarda en una carpeta y lo muestra por pantalla. No retorna nada.
+
+    Args:
+        real_demand (list): Valores para el eje y del dominio temporal
+        freqs (np.ndarray): Valores para el eje x del dominio frecuencial
+        yf (np.ndarray): Valores para el eje y del dominio frecuencial
+    """
+    #ax1 será dominio temporal, ax2 dominio frecuencial
+    fig, (ax1, ax2) = plt.subplots(2,1)
+    ax1.plot(real_demand, color="red")
+
+    ax2.plot(freqs, np.abs(yf))
+    ax2.set_xlabel('Frequency (Hz)')
+    ax2.set_ylabel('Amplitude')
+    ax2.axis(xmin=0, xmax=0.0001, ymin=0, ymax=0.2*1e8)
+    plt.show()
+
 if __name__ == "__main__":
     #datos que queremos solicitar a la API de REE
     id_ree = 1293
@@ -81,3 +99,4 @@ if __name__ == "__main__":
 
     real_demand = get_indicator(id_ree, start_date, end_date, api_token)
     freqs, yf = freq_analysis(real_demand)
+    generate_plots(real_demand, freqs, yf)
