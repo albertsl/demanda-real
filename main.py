@@ -1,7 +1,10 @@
 import requests
+import matplotlib.pyplot as plt
+import numpy as np
 from config import api_token
 from os import path, mkdir
 from datetime import datetime
+from scipy.fft import fft, fftfreq
 
 def _save_data_json(response):
     """Guarda los datos descargados de la API en un archivo. Primero comprueba si existe la carpeta data, si no existe la crea. Guarda los datos en esa carpeta, en un archivo con nombre la fecha y hora actual. Ejemplo: "13-01-2023 06-48-35.json"
@@ -12,13 +15,15 @@ def _save_data_json(response):
     if not path.isdir("data"):
         mkdir("data")
 
+    #se usa datetime.now() para dar nombre al archivo
     dt = datetime.now().strftime("%d-%m-%Y %H-%M-%S")
     with open(f"data/{dt}.json", "w") as f:
         f.write(str(response))
 
 def get_indicator(id_ree, start_date, end_date, token):
-    """Descargar datos del indicador especificado con su id en un rango de datos concreto. Se utiliza el siguiente endpoint de la API de REE:
+    """Descargar datos del indicador especificado con su id en un rango de fechas concreto. Se utiliza el siguiente endpoint de la API de REE:
     https://api.esios.ree.es/indicator/getting_a_specific_indicator_filtering_values_by_a_date_range
+    Se obtienen datos en el rango temporal indicado dividos en franjas de 5 minutos. 
 
     Args:
         id_ree (int): numero identificador de los datos
@@ -29,7 +34,7 @@ def get_indicator(id_ree, start_date, end_date, token):
     Returns:
         list: listado de valores del indicador. Está probado con el id 1293, otros datos es posible que tengan otro formato, habría que comprobarlo.
     """
-    url = f"https://api.esios.ree.es/indicators/{id_ree}?start_date={start_date}&end_date={end_date}"
+    url = f"https://api.esios.ree.es/indicators/{id_ree}?start_date={start_date}&end_date={end_date}&time_trunc=five_minutes"
     headers = {"Accept": "application/json; application/vnd.esios-api-v1+json",
                 "Content-Type": "application/json",
                 "Host": "api.esios.ree.es",
@@ -38,12 +43,35 @@ def get_indicator(id_ree, start_date, end_date, token):
     response = requests.get(url, headers=headers)
     response_json = response.json()
 
+    #se guardan los datos descargados
     _save_data_json(response_json)
 
+    #seleccionamos unicamente los datos del valor del indicador
     value_list = response_json['indicator']['values']
     final_values = [i['value'] for i in value_list]
 
     return final_values
+
+def freq_analysis(values):
+    """Calcula usando la FFT, los valores que se pondrán en la gráfica del dominio frecuencial
+
+    Args:
+        values (list): listado de valores a los que hacer la FFT. Para que funcione correctamente han de venir muestreados a una muestra cada 5 minutos.
+
+    Returns:
+        positive_freqs (np.ndarray): Eje x para la gráfica
+        positive_yf (np.ndarray): Eje y para la gráfica
+    """
+    #periodo de muestreo, cada x segundos. Como es cada 5 minutos, obtenemos una muestra cada 300 segundos. fs=1/Ts
+    fs = 1/(5*60)
+
+    #calculamos los valores del FFT, para graficar nos quedamos únicamente con las freq positivas.
+    yf = fft(values)
+    freqs = fftfreq(len(values), 1/fs)
+    positive_freqs = freqs[np.where(freqs >= 0)]
+    positive_yf = yf[np.where(freqs >= 0)]
+
+    return positive_freqs, positive_yf
 
 if __name__ == "__main__":
     #datos que queremos solicitar a la API de REE
@@ -52,3 +80,4 @@ if __name__ == "__main__":
     end_date = "2018-10-06T00%3A00" #formato ISO 8601
 
     data = get_indicator(id_ree, start_date, end_date, api_token)
+    freqs, yf = freq_analysis(data)
