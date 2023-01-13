@@ -48,9 +48,9 @@ def get_indicator(id_ree, start_date, end_date, token):
 
     #seleccionamos unicamente los datos del valor del indicador
     value_list = response_json['indicator']['values']
-    final_values = [i['value'] for i in value_list]
+    real_demand = [i['value'] for i in value_list]
 
-    return final_values
+    return real_demand
 
 def freq_analysis(values):
     """Calcula usando la FFT, los valores que se pondrán en la gráfica del dominio frecuencial
@@ -79,5 +79,5 @@ if __name__ == "__main__":
     start_date = "2018-09-02T00%3A00" #formato ISO 8601
     end_date = "2018-10-06T00%3A00" #formato ISO 8601
 
-    data = get_indicator(id_ree, start_date, end_date, api_token)
-    freqs, yf = freq_analysis(data)
+    real_demand = get_indicator(id_ree, start_date, end_date, api_token)
+    freqs, yf = freq_analysis(real_demand)
