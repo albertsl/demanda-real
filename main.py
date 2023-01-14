@@ -85,6 +85,8 @@ def generate_plots(dates, real_demand, freqs, yf):
     """
     #ax1 será dominio temporal, ax2 dominio frecuencial
     fig, (ax1, ax2) = plt.subplots(2,1, constrained_layout=True)
+
+    #dominio temporal se grafica en rojo
     ax1.plot(dates, real_demand, color="red")
     ax1.set_xlabel('Fecha')
     ax1.set_ylabel('Demanda Real (MW)')
@@ -92,11 +94,13 @@ def generate_plots(dates, real_demand, freqs, yf):
         label.set_rotation(45)
         label.set_ha('right')
 
+    #dominio frecuencial se grafica en azul (color por defecto) y se hace zoom a la parte donde se observan frecuencias relevantes.
     ax2.plot(freqs, np.abs(yf))
     ax2.set_xlabel('Frecuencia (Hz)')
     ax2.set_ylabel('Amplitud')
     ax2.axis(xmin=0, xmax=0.0001, ymin=0, ymax=0.2*1e8)
 
+    #se guardan los gráficos en un archivo y se muestra por pantalla
     if not path.isdir("results"):
         mkdir("results")
     dt = datetime.now().strftime("%d-%m-%Y %H-%M-%S")
