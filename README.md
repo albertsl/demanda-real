@@ -13,3 +13,10 @@ Se pueden cambiar los datos solicitados dando otros valores a las variables `id_
 Si se cambian estos datos, algunas cosas que pueden salir mal son:
 - Si se cambia el `id_ree` es posible que los datos devueltos por la API tengan un formato distinto y el código no funcione, habría que hacer adaptaciones
 - Si se utilizan otros datos, es posible que la gráfica en el dominio frecuencial sea muy distinta. Habría que cambiar los valores que se aplican de zoom ya que los que se proporcionan en el código son pensados específicamente para los datos del ejercicio.
+
+# Estructura del código
+El código consta de varias funciones:
+- `_save_data_json` función auxiliar utilizada para guardar en local los datos en formato JSON descargados de la API.
+- `get_indicator` función que se encarga de descargar los datos originales de la API de REE
+- `freq_analysis` función que se encarga de convertir los datos descargados en dominio temporal a dominio frecuencial
+- `generate_plots` función que a partir de los datos de los dominios temporal y frecuencial, genera una gráfica comparandolos según solicitado por el ejercicio
