@@ -84,15 +84,23 @@ def generate_plots(dates, real_demand, freqs, yf):
         yf (np.ndarray): Valores para el eje y del dominio frecuencial
     """
     #ax1 será dominio temporal, ax2 dominio frecuencial
-    fig, (ax1, ax2) = plt.subplots(2,1)
+    fig, (ax1, ax2) = plt.subplots(2,1, constrained_layout=True)
     ax1.plot(dates, real_demand, color="red")
     ax1.set_xlabel('Fecha')
     ax1.set_ylabel('Demanda Real (MW)')
+    for label in ax1.get_xticklabels():
+        label.set_rotation(45)
+        label.set_ha('right')
 
     ax2.plot(freqs, np.abs(yf))
     ax2.set_xlabel('Frecuencia (Hz)')
     ax2.set_ylabel('Amplitud')
     ax2.axis(xmin=0, xmax=0.0001, ymin=0, ymax=0.2*1e8)
+
+    if not path.isdir("results"):
+        mkdir("results")
+    dt = datetime.now().strftime("%d-%m-%Y %H-%M-%S")
+    plt.savefig(f"results/{dt}.png")
     plt.show()
 
 if __name__ == "__main__":
