@@ -20,3 +20,8 @@ El código consta de varias funciones:
 - `get_indicator` función que se encarga de descargar los datos originales de la API de REE
 - `freq_analysis` función que se encarga de convertir los datos descargados en dominio temporal a dominio frecuencial
 - `generate_plots` función que a partir de los datos de los dominios temporal y frecuencial, genera una gráfica comparandolos según solicitado por el ejercicio
+
+# Resultado
+El resultado de graficar los datos solicitados (Demanda Real) para el periodo de tiempo del 02/09/2018 al 06/10/2018 es el siguiente:
+
+![grafica](resultado.png)
