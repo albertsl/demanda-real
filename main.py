@@ -48,9 +48,11 @@ def get_indicator(id_ree, start_date, end_date, token):
 
     #seleccionamos unicamente los datos del valor del indicador
     value_list = response_json['indicator']['values']
+    dates = [i['datetime'] for i in value_list]
     real_demand = [i['value'] for i in value_list]
+    dates = [datetime.strptime(i['datetime'], '%Y-%m-%dT%H:%M:%S.%f%z') for i in value_list]
 
-    return real_demand
+    return dates, real_demand
 
 def freq_analysis(values):
     """Calcula usando la FFT, los valores que se pondrán en la gráfica del dominio frecuencial
@@ -73,7 +75,7 @@ def freq_analysis(values):
 
     return positive_freqs, positive_yf
 
-def generate_plots(real_demand, freqs, yf):
+def generate_plots(dates, real_demand, freqs, yf):
     """Genera el gráfico que muestra tanto el dominio temporal como el dominio frecuencial. Lo guarda en una carpeta y lo muestra por pantalla. No retorna nada.
 
     Args:
@@ -83,11 +85,13 @@ def generate_plots(real_demand, freqs, yf):
     """
     #ax1 será dominio temporal, ax2 dominio frecuencial
     fig, (ax1, ax2) = plt.subplots(2,1)
-    ax1.plot(real_demand, color="red")
+    ax1.plot(dates, real_demand, color="red")
+    ax1.set_xlabel('Fecha')
+    ax1.set_ylabel('Demanda Real (MW)')
 
     ax2.plot(freqs, np.abs(yf))
-    ax2.set_xlabel('Frequency (Hz)')
-    ax2.set_ylabel('Amplitude')
+    ax2.set_xlabel('Frecuencia (Hz)')
+    ax2.set_ylabel('Amplitud')
     ax2.axis(xmin=0, xmax=0.0001, ymin=0, ymax=0.2*1e8)
     plt.show()
 
@@ -97,6 +101,6 @@ if __name__ == "__main__":
     start_date = "2018-09-02T00%3A00" #formato ISO 8601
     end_date = "2018-10-06T00%3A00" #formato ISO 8601
 
-    real_demand = get_indicator(id_ree, start_date, end_date, api_token)
+    dates, real_demand = get_indicator(id_ree, start_date, end_date, api_token)
     freqs, yf = freq_analysis(real_demand)
-    generate_plots(real_demand, freqs, yf)
+    generate_plots(dates, real_demand, freqs, yf)
